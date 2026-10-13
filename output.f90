@@ -128,6 +128,21 @@ subroutine write_phi_to_file(input_name, start)
        x_val = x_val+ delx(ii)
    end do
 
+
+   write(out_id, '(A, I0)') "PHI_HAT", size(phi_hat)
+   ! Printing a descriptive header to match column widths
+   write(out_id, '(A)') "     i     x_mid            PHI_HAT"
+
+   x_val = 0
+   do ii = 1, Nx
+       
+       ! Notes on Format:
+       ! 3I6: Three integers (i, j, mat), width 6 each
+       ! 5(1x, ES16.8): 5 Reals, Scientific, 8 decimals, 1 space padding
+       write(out_id, '(1I5, 2(1x, ES16.8))') ii, (2*x_val+delx(ii))/2, phi_hat(ii) 
+       x_val = x_val+ delx(ii)
+   end do
+
    write(out_id, '(A, I0)') "CELL_AVG_PSI   ", size(psi_avg)
    ! Printing a descriptive header to match column widths
    write(out_id, '(A)') "     i      mu           x_mid            CELL_AVG_PSI"
@@ -287,6 +302,38 @@ subroutine write_phi_to_file(input_name, start)
    end do
 
    write(out_id, *)  
+   write(out_id, *)  "                 ITERATION DATA:               "
+   write(out_id, *)  
+
+   write(out_id, '(A, I0)') "ERROR_L_INF   ", num_converged_inner 
+   ! Printing a descriptive header to match column widths
+   write(out_id, '(A)') "  iteration      ERROR_L_INF"
+
+
+   do ii = 1, max_inners 
+       
+       ! Notes on Format:
+       ! 3I6: Three integers (i, j, mat), width 6 each
+       ! 5(1x, ES16.8): 5 Reals, Scientific, 8 decimals, 1 space padding
+       if(error_l_list(ii) == -1d0) exit
+       write(out_id, '(1I10, (1x, ES16.8))') ii, error_l_list(ii) 
+   end do
+
+   write(out_id, '(A, I0)') "RHO_L   ", num_converged_inner
+   ! Printing a descriptive header to match column widths
+   write(out_id, '(A)') "  iteration      RHO_L"
+
+
+   do ii = 1, max_inners 
+       
+       ! Notes on Format:
+       ! 3I6: Three integers (i, j, mat), width 6 each
+       ! 5(1x, ES16.8): 5 Reals, Scientific, 8 decimals, 1 space padding
+       if(error_l_list(ii) == -1d0) exit
+       write(out_id, '(1I10, (1x, ES16.8))') ii, rho_l_list(ii) 
+   end do
+
+   write(out_id, *)  
    write(out_id, *)  "                 SOLUTIION SUMMARY:               "
    write(out_id, *)  
 
@@ -294,7 +341,7 @@ subroutine write_phi_to_file(input_name, start)
    write(out_id, "(A, ES16.8)") "Convergence Criterion, e_l < epsilon * (e_l-1/el - 1) with epsilon: ", inner_tol 
    write(out_id, *)  
 
-   if(success_inner == 1) then
+   if(success_inner) then
      write(out_id,*) "Inner iterations concluded successfully"
    else
      write(out_id, *) "Inner iterations concluded unsuccessfully"

@@ -34,6 +34,9 @@ contains
     allocate (iterative_residual(Nx), source = 1d0)
     allocate (iterative_residual_hat(Nx), source = 1d0)
 
+    allocate (error_l_list(max_inners), source = -1d0)
+    allocate (rho_l_list(max_inners), source = -1d0)
+
     Q_i = q_ext_i
     Q_hat_i = q_ext_hat_i
     error_vector = phi_old - phi 
@@ -47,7 +50,8 @@ contains
                psi_left, psi_right,&          ! outgoing angular flux
                left_bc, right_bc,&          ! incoming angular fluux bcs
                error_vector,&  !flux moment variables
-               Q_i, Q_hat_i)          !source moment variables
+               Q_i, Q_hat_i,&          !source moment variables 
+               error_l_list)
 
 
     !compute scheme residual

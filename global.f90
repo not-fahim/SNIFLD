@@ -44,7 +44,8 @@ module global_vars
   character(len=255)  :: input_name 
   real  :: start
   integer                      :: max_inners 
-  integer                      :: inin, success_inner
-  real(kind(0d0))              :: inerror, inner_tol
-  real(kind(0d0))              :: error_l, error_l_old;
+  integer                      :: inin, num_converged_inner
+  logical                      :: success_inner
+  real(kind(0d0))              :: inerror, inner_tol, error_l
+  real(kind(0d0)), allocatable :: error_l_list(:), rho_l_list(:)
 end module global_vars

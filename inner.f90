@@ -24,7 +24,8 @@ contains
                     right_bc,&  ! incoming right angular flux
                     error_vector,&  !holds difference between scalar flux moment from old iterate
                     Q_i,&          !source
-                    Q_hat_i)       !source spatial moment
+                    Q_hat_i, &       !source spatial moment
+                    error_l_list)       !list of L_inf norm for each iteration
 
     integer, intent(in) :: max_inners      !maximum number of inners, input
     real(kind(0d0)), intent(in) :: inner_tol !convergence criteria, input
@@ -37,7 +38,7 @@ contains
     real(kind(0d0)), intent(inout) :: psi_edge(:,:) 
     real(kind(0d0)), intent(inout) :: psi_hat(:,:)
     real(kind(0d0)), intent(inout) :: psi_left(:), psi_right(:) 
-    real(kind(0d0)), intent(in) :: left_bc(:), right_bc(:)
+    real(kind(0d0)), intent(in)    :: left_bc(:), right_bc(:)
 
     real(kind(0d0)), intent(inout) :: Jx_avg(:) 
     real(kind(0d0)), intent(inout) :: Jx_edge(:) 
@@ -53,11 +54,18 @@ contains
     real(kind(0d0)), intent(inout) :: Q_i(:) !holds souce values, 
     real(kind(0d0)), intent(inout) :: Q_hat_i(:) !holds source spatial moments, 
 
+    real(kind(0d0)), intent(inout) :: error_l_list(:) !holds source spatial moments, 
+
     integer :: i, mat_idx 
-    real(kind(0d0)) :: abs_error
+    real(kind(0d0)) :: error_l_old, rho_l
+    logical                        :: success_inner
+
+    error_l = 1e20 
+    error_l_old = 1e20 
+    rho_l = 0d0
     
 
-    success_inner = 0
+    success_inner = .false. 
 
     do inin = 1, max_inners 
         phi_old = phi
@@ -108,10 +116,15 @@ contains
 
 
         error_vector = phi - phi_old
-        error_l = inf_norm(error_vector)
 
-        if(is_converged(error_l, error_l_old, inner_tol, inin)) then
-          success_inner = 1
+        error_l = inf_norm(error_vector)
+        rho_l = error_l / error_l_old
+
+
+        error_l_list(inin) = error_l
+        rho_l_list(inin) = rho_l
+        if(is_converged(error_l, rho_l, inner_tol, inin)) then
+          success_inner = .true. 
           exit  
         end if
         error_l_old = error_l
@@ -119,12 +132,14 @@ contains
 
     inin = inin-1 
 
-    if(success_inner == 1) then 
+    if(success_inner) then 
         inin = inin+1
         write (*, '(A)')"Complete: inner iterations concluded successfully"
       else
         write(*,'(A)') "Warning: inner iterations concluded unsuccessfully"
     end if
+
+    num_converged_inner = inin 
 
 
     write (*, '(A, 1ES16.1)')"number of inner iteration: ", real(inin)
@@ -147,15 +162,12 @@ contains
 
   end function inf_norm
 
-  logical function is_converged(error_l, error_l_old, epsilon_phi, iter)
+  logical function is_converged(error_l, rho_l, epsilon_phi, iter)
 
-    real(kind(0d0)), intent(in) :: error_l, error_l_old, epsilon_phi 
-    real(kind(0d0))             :: rho_l, rhs
-    integer                     :: iter 
-    
+    real(kind(0d0)), intent(in) :: error_l, rho_l, epsilon_phi 
+    integer, intent(in)         :: iter 
+    real(kind(0d0))             :: rhs
 
-
-    rho_l = error_l / error_l_old
     rhs = epsilon_phi * (1/rho_l  - 1)
 
 !   write(*, *) "iteration: ", iter

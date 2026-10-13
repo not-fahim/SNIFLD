@@ -65,9 +65,10 @@ contains
 
     integer :: i, mat_idx 
     real(kind(0d0)) :: abs_error
+    logical ::success_inner
     
 
-    success_inner = 0
+    success_inner = .false. 
 
     do inin = 1, max_inners 
 
@@ -130,7 +131,7 @@ contains
 
         if( is_converged(error_phi, error_phi_old, inner_tol, inin) &
             .and. is_converged(error_keff, error_keff_old, inner_tol, inin)  ) then
-          success_inner = 1
+          success_inner = .true.
           exit  
         end if
 
@@ -140,7 +141,7 @@ contains
 
     inin = inin-1 
 
-    if(success_inner == 1) then 
+    if(success_inner) then 
         inin = inin+1
         write (*, '(A)')"Complete: inner iterations concluded successfully"
       else

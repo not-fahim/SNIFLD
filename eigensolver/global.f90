@@ -33,6 +33,8 @@ module global_vars
 
   real(kind(0d0)), allocatable ::  psi_left(:) , psi_right(:)  ! outgoing angular fluxy
   real(kind(0d0)), allocatable ::  psi_left_old(:) , psi_right_old(:)  ! outgoing angular flux at the boundary
+  real(kind(0d0)), allocatable ::  scheme_residual(:), scheme_residual_hat(:)
+  real(kind(0d0)), allocatable ::  iterative_residual(:), iterative_residual_hat(:)
   !scalar flux moment map  
 
   character(len=8)    :: date_str
@@ -42,7 +44,8 @@ module global_vars
   
   !variables for inner iterations
   integer                      :: max_inners 
-  integer                      :: inin, success_inner
+  integer                      :: inin, num_converged_inner
+  logical                      :: success_inner
   real(kind(0d0))              :: inerror, inner_tol
   real(kind(0d0))              :: error_phi, error_phi_old;
   

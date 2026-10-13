@@ -128,6 +128,22 @@ subroutine write_phi_to_file(input_name, start)
        x_val = x_val+ delx(ii)
    end do
 
+   write(out_id, *) 
+   write(out_id, '(A, I0)') "PHI_HAT", size(phi_hat)
+   ! Printing a descriptive header to match column widths
+   write(out_id, '(A)') "     i     x_mid            PHI_HAT"
+
+   x_val = 0
+   do ii = 1, Nx
+       
+       ! Notes on Format:
+       ! 3I6: Three integers (i, j, mat), width 6 each
+       ! 5(1x, ES16.8): 5 Reals, Scientific, 8 decimals, 1 space padding
+       write(out_id, '(1I5, 2(1x, ES16.8))') ii, (2*x_val+delx(ii))/2, phi_hat(ii) 
+       x_val = x_val+ delx(ii)
+   end do
+
+
    write(out_id, '(A, I0)') "CELL_AVG_PSI   ", size(psi_avg)
    ! Printing a descriptive header to match column widths
    write(out_id, '(A)') "     i      mu           x_mid            CELL_AVG_PSI"
@@ -226,6 +242,68 @@ subroutine write_phi_to_file(input_name, start)
        x_val = x_val+ delx(ii-1)
    end do
 
+   write(out_id, '(A, I0)') "SCHEME_RESIDUAL   ", size(scheme_residual)
+   ! Printing a descriptive header to match column widths
+   write(out_id, '(A)') "     i      x_mid            SCHEME_RESIDUAL"
+
+   x_val = 0
+
+   do ii = 1, Nx
+       
+       ! Notes on Format:
+       ! 3I6: Three integers (i, j, mat), width 6 each
+       ! 5(1x, ES16.8): 5 Reals, Scientific, 8 decimals, 1 space padding
+       write(out_id, '(1I5, 2(1x, ES16.8))') ii, (2*x_val+delx(ii))/2, scheme_residual(ii) 
+       x_val = x_val+ delx(ii)
+   end do
+
+   write(out_id, '(A, I0)') "SCHEME_RESIDUAL_HAT   ", size(scheme_residual_hat)
+   ! Printing a descriptive header to match column widths
+   write(out_id, '(A)') "     i      x_mid            SCHEME_RESIDUAL_HAT"
+
+   x_val = 0
+
+   do ii = 1, Nx
+       
+       ! Notes on Format:
+       ! 3I6: Three integers (i, j, mat), width 6 each
+       ! 5(1x, ES16.8): 5 Reals, Scientific, 8 decimals, 1 space padding
+       write(out_id, '(1I5, 2(1x, ES16.8))') ii, (2*x_val+delx(ii))/2, scheme_residual_hat(ii) 
+       x_val = x_val+ delx(ii)
+   end do
+
+   write(out_id, '(A, I0)') "ITERATIVE_RESIDUAL   ", size(iterative_residual)
+   ! Printing a descriptive header to match column widths
+   write(out_id, '(A)') "     i      x_mid            ITERATIVE_RESIDUAL"
+
+   x_val = 0
+
+   do ii = 1, Nx
+       
+       ! Notes on Format:
+       ! 3I6: Three integers (i, j, mat), width 6 each
+       ! 5(1x, ES16.8): 5 Reals, Scientific, 8 decimals, 1 space padding
+       write(out_id, '(1I5, 2(1x, ES16.8))') ii, (2*x_val+delx(ii))/2, iterative_residual(ii) 
+       x_val = x_val+ delx(ii)
+   end do
+
+   write(out_id, '(A, I0)') "ITERATIVE_RESIDUAL_HAT   ", size(iterative_residual_hat)
+   ! Printing a descriptive header to match column widths
+   write(out_id, '(A)') "     i      x_mid            ITERATIVE_RESIDUAL_HAT"
+
+   x_val = 0
+
+   do ii = 1, Nx
+       
+       ! Notes on Format:
+       ! 3I6: Three integers (i, j, mat), width 6 each
+       ! 5(1x, ES16.8): 5 Reals, Scientific, 8 decimals, 1 space padding
+       write(out_id, '(1I5, 2(1x, ES16.8))') ii, (2*x_val+delx(ii))/2, iterative_residual_hat(ii) 
+       x_val = x_val+ delx(ii)
+   end do
+
+   write(out_id, *)  
+
 
 
    write(out_id, *)  
@@ -233,7 +311,7 @@ subroutine write_phi_to_file(input_name, start)
    write(out_id, "(A, ES16.8)") "Convergence Criterion, e_l < epsilon * (e_l-1/el - 1) with epsilon: ", inner_tol 
    write(out_id, *)  
 
-   if(success_inner == 1) then
+   if(success_inner) then
      write(out_id,*) "Inner iterations concluded successfully"
    else
      write(out_id, *) "Inner iterations concluded unsuccessfully"

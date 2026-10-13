@@ -48,4 +48,4 @@
 0 0 0 0 0 0 0 0 0 0
 0 0 0 0 0 0 0 0 0 0
 #card 10: inner tol and number of max iterations
-1e-8 10000 
+1e-8 10000000 

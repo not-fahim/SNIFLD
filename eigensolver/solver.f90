@@ -5,6 +5,8 @@ module transport_mod
 contains
   subroutine transport_solver()
     integer :: ii, mm
+    real(kind(0d0)) :: norm_phi
+
     allocate (Q_i(Nx), source = 0d0)
     allocate (Q_hat_i(Nx), source = 0d0)
 
@@ -27,6 +29,12 @@ contains
     allocate (phi_old(Nx), source = 1d0)
     allocate (phi_hat_old(Nx), source = 0d0)
     allocate (error_vector(Nx), source = 0d0)
+
+    allocate (scheme_residual(Nx), source = 1d0)
+    allocate (scheme_residual_hat(Nx), source = 1d0)
+
+    allocate (iterative_residual(Nx), source = 1d0)
+    allocate (iterative_residual_hat(Nx), source = 1d0)
 
     keff = 1.00
     keff_old = 1.00
@@ -51,5 +59,103 @@ contains
                fiss_src, fiss_src_old,&  !keff to manipulate
                Q_i, Q_hat_i)          !source moment variables
 
+    norm_phi = sum(phi)
+    
+    call normalize_psi(psi_avg, norm_phi)
+    call normalize_psi(psi_hat, norm_phi)
+    call normalize_psi_edge(psi_edge, norm_phi)
+
+    call normalize_phi(phi, norm_phi)
+    call normalize_phi(phi_old, norm_phi)
+    call normalize_phi(phi_hat, norm_phi)
+    call normalize_phi(phi_hat_old, norm_phi)
+    call normalize_phi_edge(Jx_edge, norm_phi)
+
+    call normalize_phi(Jx_avg, norm_phi)
+    call normalize_phi(Jx_hat, norm_phi)
+    call normalize_phi_edge(phi_edge, norm_phi)
+
+    !compute scheme residual
+    call compute_residual(phi, phi_old, Jx_edge, scheme_residual)
+    call compute_residual_hat(phi_hat, phi_hat_old, Jx_avg, Jx_edge, scheme_residual_hat)
+
+    !compute iterative residual
+    call compute_residual(phi, phi, Jx_edge, iterative_residual)
+    call compute_residual_hat(phi_hat, phi_hat, Jx_avg, Jx_edge, iterative_residual_hat)
+
+
   end subroutine transport_solver
+  
+  subroutine compute_residual(phi,  phi_old, Jx_edge, residual)
+      real(kind(0d0)), intent(in)    :: phi(:), phi_old(:), Jx_edge(:)
+      real(kind(0d0)), intent(inout) :: residual(:)
+      integer :: ii, mm, mat_idx
+    
+      do ii = 1, Nx              
+          mat_idx = matmap(ii)
+          residual(ii) = Jx_edge(ii+1) - Jx_edge(ii) + sigma_t(mat_idx) * phi(ii) * delx(ii) &
+                        - (sigma_s(mat_idx) + nu(mat_idx) * sigma_f(mat_idx)) * phi_old(ii) * delx(ii) &
+                        - q_ext_i(ii) * delx(ii)
+      end do
+  end subroutine compute_residual
+
+  subroutine compute_residual_hat(phi_hat,  phi_hat_old, Jx_avg, Jx_edge, residual)
+      real(kind(0d0)), intent(in)    :: phi_hat(:), phi_hat_old(:), Jx_edge(:), Jx_avg(:)
+      real(kind(0d0)), intent(inout) :: residual(:)
+
+      integer :: ii, mm, mat_idx
+    
+      do ii = 1, Nx              
+          mat_idx = matmap(ii)
+          residual(ii) = 3d0 * ( Jx_edge(ii+1) + Jx_edge(ii) - 2d0 * Jx_avg(ii) ) &
+                        + sigma_t(mat_idx) * phi_hat(ii) * delx(ii)&
+                        - ( sigma_s(mat_idx) + nu(mat_idx) * sigma_f(mat_idx) ) * phi_hat_old(ii) * delx(ii) &
+                        - q_ext_hat_i(ii) * delx(ii)
+      end do
+  end subroutine compute_residual_hat
+
+  subroutine normalize_phi(phi, val)
+      real(kind(0d0)), intent(inout) :: phi(:)
+      real(kind(0d0)), intent(in)    :: val
+      integer :: ii
+
+      do ii = 1,Nx
+         phi(ii) = phi(ii) / val
+      end do
+  end subroutine normalize_phi
+
+  subroutine normalize_phi_edge(phi, val)
+      real(kind(0d0)), intent(inout) :: phi(:)
+      real(kind(0d0)), intent(in)    :: val
+      integer :: ii
+
+      do ii = 1,Nx+1
+         phi(ii) = phi(ii) / val
+      end do
+  end subroutine normalize_phi_edge
+
+  subroutine normalize_psi(psi, val)
+      real(kind(0d0)), intent(inout) :: psi(:,:)
+      real(kind(0d0)), intent(in)    :: val
+      integer :: ii, mm
+
+      do ii = 1,Nx
+         do mm = 1, Nq
+            psi(ii,mm) = psi(ii, mm) / val
+         end do
+      end do
+  end subroutine normalize_psi
+
+  subroutine normalize_psi_edge(psi, val)
+      real(kind(0d0)), intent(inout) :: psi(:,:)
+      real(kind(0d0)), intent(in)    :: val
+      integer :: ii, mm
+
+      do ii = 1,Nx+1
+         do mm = 1, Nq
+            psi(ii,mm) = psi(ii, mm) / val
+         end do
+      end do
+  end subroutine normalize_psi_edge
+
 end module transport_mod
