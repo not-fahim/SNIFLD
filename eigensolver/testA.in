@@ -1,0 +1,50 @@
+#card 1: Nx
+40 
+#card 2: dx
+0.2 0.20 0.20 0.20 0.20 
+0.2 0.20 0.20 0.20 0.20 
+0.2 0.20 0.20 0.20 0.20 
+0.2 0.20 0.20 0.20 0.20 
+0.2 0.20 0.20 0.20 0.20 
+0.2 0.20 0.20 0.20 0.20 
+0.2 0.20 0.20 0.20 0.20 
+0.2 0.20 0.20 0.20 0.20 
+#card 3: number of Discrete ordinates (DO) 
+#only half are written
+#code uses symmetry for the others
+4
+#card 4: D.O. data
+#mu 		w
+0.1834346425	0.3626837833
+0.5255324099	0.3137066459
+0.7966664774	0.2223810345
+0.9602898565	0.1012285363
+#card 5: materials
+5
+#card 6: material data
+50.0  0.0 0.0 0.0	
+5.0 	0.0 0.0 0.0
+0.0 	0.0 0.0 0.0
+1.1 	0.7 2.0 0.1
+1.1 	0.5 2.5 0.16
+#card 7.1: left BC per DO
+-1.0 -1.0 -1.0 -1.0
+#card 7.2: right BC per DO
+0.0 0.0 0.0 0.0 #-1 means reflective
+#card 8: material mapping
+1 1 1 1 1 1 1 1 1 1
+2 2 2 2 2 3 3 3 3 3
+3 3 3 3 3 4 4 4 4 4
+5 5 5 5 5 5 5 5 5 5
+#card 9: source zeroth moment map
+50 50 50 50 50 50 50 50 50 50
+ 0  0  0  0  0  0  0  0  0  0
+ 0  0  0  0  0  0  0  0  0  0
+ 1  1  1  1  1  1  1  1  1  1
+#card 9.1: source first moment map
+0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0
+#card 10: inner tol and number of max iterations
+1e-6 50
